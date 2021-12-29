@@ -8,19 +8,19 @@ public class TlvObject {
     private List<Byte> lengthBytesList;
 
 
-    private int currentLevelLength;
 
-
-    private byte classEncoding;
+    private byte classOfTag;
     private byte type;
     private byte identifier;
     private int length;
     private boolean definite;
-    private int level;
     private List<Byte> data;
+    private int level;
+
+
+
     private List<TlvObject> childs;
     private TlvObject tlvFather;
-    private boolean hasChild;
 
     public TlvObject() {
         this.length = 0;
@@ -29,8 +29,20 @@ public class TlvObject {
         this.childs = new ArrayList<>();
     }
 
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public void addChild(TlvObject child) {
         childs.add(child);
+    }
+
+    public List<TlvObject> getChilds() {
+        return childs;
     }
 
     public void addLengthByte(byte lengthByte) {
@@ -57,8 +69,12 @@ public class TlvObject {
         this.tlvFather = tlvFather;
     }
 
-    public void setClassEncoding(byte classEncoding) {
-        this.classEncoding = classEncoding;
+    public void setClassOfTag(byte classEncoding) {
+        this.classOfTag = classEncoding;
+    }
+
+    public byte getClassOfTag() {
+        return classOfTag;
     }
 
     public byte getType() {

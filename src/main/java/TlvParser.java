@@ -1,18 +1,22 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-public class TlvParser {
+public class TlvParser{
 
 
-    public static void parse(byte[] data) {
+    public String getParseResult(byte[] data) {
+        TlvObject treeTopTlv = parse(data);
+        return Printer.getResultString(treeTopTlv);
+    }
+
+    private TlvObject parse(byte[] data) {
+        int level = 0;
         List<TlvObject> tlvObjects = new ArrayList<>();
         TlvObject mainTlvObject = new TlvObject();
-        List<TlvObject> headTlvObjects = new ArrayList<>();
-
-
-
+        mainTlvObject.setLevel(level);
         addOneLevelTlvs(mainTlvObject, data, tlvObjects);
 
         for (TlvObject object : tlvObjects) {
@@ -20,9 +24,10 @@ public class TlvParser {
                 parseTlv(object);
             }
         }
+        return mainTlvObject;
     }
 
-    private static void parseTlv(TlvObject parentTlv) {
+    private void parseTlv(TlvObject parentTlv) {
         List<TlvObject> tlvObjects = new ArrayList<>();
 
         // Забираем данные из объекта
@@ -37,7 +42,7 @@ public class TlvParser {
         buildThree(tlvObjects);
     }
 
-    private static void buildThree(List<TlvObject> tlvObjects) {
+    private void buildThree(List<TlvObject> tlvObjects) {
         for (TlvObject obj : tlvObjects) {
             if (obj.getType() == 1) {
                 parseTlv(obj);
@@ -45,7 +50,7 @@ public class TlvParser {
         }
     }
 
-    private static void addOneLevelTlvs(TlvObject parentTlv, byte[] data, List<TlvObject> tlvObjects) {
+    private void addOneLevelTlvs(TlvObject parentTlv, byte[] data, List<TlvObject> tlvObjects) {
         int pointer = 0;
         while (pointer < data.length) {
 
@@ -64,9 +69,13 @@ public class TlvParser {
             pointer += tlvObject.getLengthBytesList().size();
 
             if (tlvObject.isDefinite()) {
+                int level = parentTlv.getLevel() + 1;
+                tlvObject.setLevel(level);
                 List<Byte> value = getValueFromData(tlvObject, data, pointer);
                 tlvObject.setValue(value);
             } else {
+                int level = parentTlv.getLevel() + 1;
+                tlvObject.setLevel(level);
                 //Все данные, начиная с неопределенной длины
                 byte[] dataOfIndefiniteObject = Arrays.copyOfRange(data, pointer, data.length);
                 parseIndefinite(dataOfIndefiniteObject, tlvObject);
@@ -77,6 +86,7 @@ public class TlvParser {
             tlvObject.setTlvFather(parentTlv);
             parentTlv.addChild(tlvObject);
 
+
             pointer += tlvObject.getLength();
 
             if (!tlvObject.getTlvFather().isDefinite() && tlvObject.getType() == 0 && tlvObject.getLength() == 0) {
@@ -86,7 +96,7 @@ public class TlvParser {
     }
 
 
-    private static void parseIndefinite(byte[] data, TlvObject parentTlv) {
+    private void parseIndefinite(byte[] data, TlvObject parentTlv) {
         List<TlvObject> indefiniteObjectList = new ArrayList<>();
 
         addOneLevelTlvs(parentTlv, data, indefiniteObjectList);
@@ -99,8 +109,8 @@ public class TlvParser {
     }
 
 
-    private static TlvObject createTlvObjectWithTag(byte oneTagByte, TlvObject tlvObject) {
-        tlvObject.setClassEncoding((byte) ((oneTagByte & 0xC0) >> 6));
+    private TlvObject createTlvObjectWithTag(byte oneTagByte, TlvObject tlvObject) {
+        tlvObject.setClassOfTag((byte) ((oneTagByte & 0xC0) >> 6));
         tlvObject.addTagByte(oneTagByte);
         tlvObject.setType((byte) ((oneTagByte & 0x20) >> 5));
         tlvObject.setIdentifier((byte) (oneTagByte & 0x1F));
@@ -108,7 +118,7 @@ public class TlvParser {
     }
 
 
-    private static byte createSeveralBytesId(TlvObject tlvObject, byte[] data, int pointer) {
+    private byte createSeveralBytesId(TlvObject tlvObject, byte[] data, int pointer) {
         int numOfIdBytes = 1;
         pointer++;
         tlvObject.addTagByte(data[pointer]);
@@ -127,12 +137,12 @@ public class TlvParser {
         return identifier;
     }
 
-    private static byte getMultipleByteIdentifier(byte hexByte) {
+    private byte getMultipleByteIdentifier(byte hexByte) {
         return (byte) (hexByte & 0x7F);
     }
 
 
-    private static int getLengthFromData(TlvObject tlvObject, byte[] data, int pointer) {
+    private int getLengthFromData(TlvObject tlvObject, byte[] data, int pointer) {
         int length = 0;
         if (data[pointer] == (byte) 0x80) {
             tlvObject.addLengthByte(data[pointer]);
@@ -150,7 +160,7 @@ public class TlvParser {
     }
 
 
-    private static List<Byte> getValueFromData(TlvObject tlvObject, byte[] data, int pointer) {
+    private List<Byte> getValueFromData(TlvObject tlvObject, byte[] data, int pointer) {
         List<Byte> value = new ArrayList<>();
         for (int j = 0; j < tlvObject.getLength(); j++) {
             value.add(data[pointer + j]);
@@ -159,13 +169,13 @@ public class TlvParser {
     }
 
 
-    private static int getSeveralBytesLength(TlvObject tlvObject, byte[] data, int pointer) {
+    private int getSeveralBytesLength(TlvObject tlvObject, byte[] data, int pointer) {
         int numOfLenBytes = data[pointer] & 0x7F;
         pointer++;
         int length = 0;
         for (int j = pointer; j < pointer + numOfLenBytes; j++) {
             length = (length * 0x100) + (data[j] & 0xFF);
-            tlvObject.addLengthByte(data[pointer]);
+            tlvObject.addLengthByte(data[j]);
         }
         return length;
     }
