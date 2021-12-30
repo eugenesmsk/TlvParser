@@ -3,12 +3,9 @@ import java.util.List;
 
 public class TlvObject {
 
-
-    private List<Byte> tagBytesList;
-    private List<Byte> lengthBytesList;
-
-
-
+    private final List<Byte> tagBytesList;
+    private final List<Byte> lengthBytesList;
+    private final List<TlvObject> childs;
     private byte classOfTag;
     private byte type;
     private byte identifier;
@@ -16,10 +13,6 @@ public class TlvObject {
     private boolean definite;
     private List<Byte> data;
     private int level;
-
-
-
-    private List<TlvObject> childs;
     private TlvObject tlvFather;
 
     public TlvObject() {
@@ -69,12 +62,12 @@ public class TlvObject {
         this.tlvFather = tlvFather;
     }
 
-    public void setClassOfTag(byte classEncoding) {
-        this.classOfTag = classEncoding;
-    }
-
     public byte getClassOfTag() {
         return classOfTag;
+    }
+
+    public void setClassOfTag(byte classEncoding) {
+        this.classOfTag = classEncoding;
     }
 
     public byte getType() {

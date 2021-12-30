@@ -1,26 +1,47 @@
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.List;
 
 public class Converter {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static final Logger logger = LogManager.getLogger(DataLoader.class);
 
     public static String bytesToHex(List<Byte> bytes) {
-        char[] hexChars = new char[bytes.size() * 2];
-        for (int j = 0; j < bytes.size(); j++) {
-            int v = bytes.get(j) & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        try {
+            char[] hexChars = new char[bytes.size() * 2];
+            for (int j = 0; j < bytes.size(); j++) {
+                int v = bytes.get(j) & 0xFF;
+                hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+                hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+            }
+            return new String(hexChars);
+        } catch (NullPointerException e) {
+            logger.error("Input List<Byte> in bytesToHex() is null");
         }
-        return new String(hexChars);
+        return "";
     }
 
     public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        // Тут проверить, что четное количество
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
+        try {
+            try {
+                if (s.length() % 2 != 0) throw new StringIndexOutOfBoundsException();
+                else {
+                    int len = s.length();
+                    byte[] data = new byte[len / 2];
+                    for (int i = 0; i < len; i += 2) {
+                        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                                + Character.digit(s.charAt(i + 1), 16));
+                    }
+                    return data;
+                }
+            } catch (StringIndexOutOfBoundsException e) {
+                logger.error("Odd number of characters in the hex line " +
+                        "of the string (hexStringToByteArray): {}", s.length());
+            }
+        } catch (NullPointerException ex) {
+            logger.error("Input string in hexStringToByteArray() is null");
         }
-        return data;
+        return new byte[0];
     }
 }

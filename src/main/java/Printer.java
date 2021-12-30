@@ -2,10 +2,11 @@ import java.util.List;
 
 public class Printer {
 
-    public static String getResultString(TlvObject treeTopNode) {
+    public static void getResultString(TlvObject treeTopNode) {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n");
         Printer.formString(stringBuilder, treeTopNode);
-        return String.valueOf(stringBuilder);
+        System.out.println(stringBuilder);
     }
 
     private static void formString(StringBuilder stringBuilder, TlvObject treeNode) {
@@ -43,7 +44,6 @@ public class Printer {
             throw new IllegalArgumentException("Wrong class of tag");
         }
     }
-
 
     private static String defineTagType(byte typeOfTag) {
         if (typeOfTag == 0) {
@@ -85,5 +85,4 @@ public class Printer {
             return String.format("Value: (%d TLVs)\n", childNum);
         }
     }
-
 }
