@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represent TlvObjects. After parsing data it has parent TlvObject and list of childs.
+ * @author Evgeniy Smirnov
+ */
 public class TlvObject {
 
     private final List<Byte> tagBytesList;
