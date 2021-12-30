@@ -5,6 +5,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * This class provides static method to get data.
+ * @author Evgeniy Smirnov
+ */
 public class DataLoader {
 
     private static final Logger logger = LogManager.getLogger(DataLoader.class);

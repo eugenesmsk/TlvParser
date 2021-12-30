@@ -5,11 +5,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class processes the received data array and builds a tree of dependencies of TLV objects.
+ * @author Evgeniy Smirnov
+ */
 public class TlvParser {
 
     private static final Logger logger = LogManager.getLogger(TlvParser.class);
 
-    public void getParseResult(byte[] data) throws IllegalArgumentException {
+    /**
+     * Creates top of tree of dependencies of TLV objects.
+     * Calls static method of Printer which print parsed data to System.out.
+     *
+     * @param data                          byte[] array to be parsed
+     */
+    public void getParseResult(byte[] data) {
         if (data.length == 0) {
             logger.error("Data array is empty. Check input file.");
         }
@@ -17,7 +27,15 @@ public class TlvParser {
         Printer.getResultString(treeTopTlv);
     }
 
-    private TlvObject parse(byte[] data) throws IllegalArgumentException {
+    /**
+     * Returns the tree top which have links to childs which already have links to their childs etc.
+     * Start parsing zero-level received data. Adds the persed TLV objects of the zero level in the
+     * list and in the for loop sends them to parse further if object in list have difinite length.
+     * Indefinite length is parsing in <code>parseIndefinite(byte[] data, TlvObject parentTlv)</code>.
+     * @param data  byte[] array to be parsed
+     * @return      tree top TLV object
+     */
+    private TlvObject parse(byte[] data) {
         int level = 0;
         List<TlvObject> tlvObjects = new ArrayList<>();
         TlvObject mainTlvObject = new TlvObject();
@@ -33,7 +51,12 @@ public class TlvParser {
         return mainTlvObject;
     }
 
-    private void parseTlv(TlvObject parentTlv) throws IllegalArgumentException {
+    /**
+     * Get value list (data) from parent TlvObject and fall on one
+     * level to get list of TlvObjects of the next nesting level.
+     * @param parentTlv     TlvObject which is received from zero nesting level
+     */
+    private void parseTlv(TlvObject parentTlv) {
         List<TlvObject> tlvObjects = new ArrayList<>();
         List<Byte> dataList = parentTlv.getValue();
         byte[] data = new byte[dataList.size()];
@@ -46,7 +69,12 @@ public class TlvParser {
         buildThree(tlvObjects);
     }
 
-    private void buildThree(List<TlvObject> tlvObjects) throws IllegalArgumentException {
+    /**
+     * Fall to next nesting level and calls <code>parseTlv(TlvObject parentTlv</code>
+     * which get list of TlvObjects of the fall nesting level.
+     * @param tlvObjects    List of TlvObjects which it got from <code>parseTlv(TlvObject parentTlv</code>
+     */
+    private void buildThree(List<TlvObject> tlvObjects) {
         for (TlvObject obj : tlvObjects) {
             if (obj.getType() == 1) {
                 parseTlv(obj);
@@ -54,7 +82,15 @@ public class TlvParser {
         }
     }
 
-    private void addOneLevelTlvs(TlvObject parentTlv, byte[] data, List<TlvObject> tlvObjects) throws IllegalArgumentException {
+    /**
+     * Adds TlvObjects of one level, call methods for filling TlvObject's.
+     * Adds relations between childs and parents. If Tlv object have indefinite
+     * length, it calls <code>parseIndefinite(byte[] data, TlvObject parentTlv)</code>
+     * @param parentTlv     parent TlvObject
+     * @param data          data of current level
+     * @param tlvObjects    link on tlvObjects list in which the objects are added at the current nesting level
+     */
+    private void addOneLevelTlvs(TlvObject parentTlv, byte[] data, List<TlvObject> tlvObjects) {
         int pointer = 0;
         while (pointer < data.length) {
             TlvObject tlvObject = createTlvObjectWithTag(data[pointer], new TlvObject());
@@ -98,8 +134,14 @@ public class TlvParser {
         }
     }
 
-
-    private void parseIndefinite(byte[] data, TlvObject parentTlv) throws IllegalArgumentException {
+    /**
+     * Parsing of indefinite length TlvObject. Get data from first byte of indefinite object to the last byte,
+     * fall to the lext level and add all TlvObjects to list. In case of meeting another indefinite TlvObject's
+     * happens the same.
+     * @param data      data which starts from first byte of indefinite object
+     * @param parentTlv parent indefinite TlvObject which is parent to <code>indefiniteObjectList</code>
+     */
+    private void parseIndefinite(byte[] data, TlvObject parentTlv) {
         List<TlvObject> indefiniteObjectList = new ArrayList<>();
         addOneLevelTlvs(parentTlv, data, indefiniteObjectList);
         for (TlvObject object : indefiniteObjectList) {
@@ -123,6 +165,13 @@ public class TlvParser {
         }
     }
 
+    /**
+     *
+     * Get and parse data from one-byte tag and then save it to TlvObject.
+     * @param oneTagByte tag byte
+     * @param tlvObject  current TlvObject
+     * @return           TlvObject with filled class, type and identifier.
+     */
     private TlvObject createTlvObjectWithTag(byte oneTagByte, TlvObject tlvObject) {
         tlvObject.setClassOfTag((byte) ((oneTagByte & 0xC0) >> 6));
         tlvObject.addTagByte(oneTagByte);
@@ -131,6 +180,14 @@ public class TlvParser {
         return tlvObject;
     }
 
+    /**
+     * Returns identifier in case several-bytes id and adds every byte to <code>addTagByte</code> list.
+     * In case of 8th bit of additional byte is not 0, current byte adds to the identifier.
+     * @param tlvObject current TlvObject
+     * @param data      current level data
+     * @param pointer   offset of data list
+     * @return          identifier of TlvObject
+     */
     private byte createSeveralBytesId(TlvObject tlvObject, byte[] data, int pointer) {
         int numOfIdBytes = 1;
         pointer++;
@@ -150,10 +207,24 @@ public class TlvParser {
         return identifier;
     }
 
+    /**
+     * Returns additional byte of multiple-byte identifier from data list from 1 to 7 bit.
+     * 8th bit is 0
+     * @param hexByte   next identifier byte
+     * @return          return 1-7 bit of current byte
+     */
     private byte getMultipleByteIdentifier(byte hexByte) {
         return (byte) (hexByte & 0x7F);
     }
 
+    /**
+     * Returns length of TlvObject received from data and define length type of TlvObject:
+     * defined or indefined.
+     * @param tlvObject current TlvObject
+     * @param data      current level data
+     * @param pointer   offset of data list
+     * @return          length of TlvObject
+     */
     private int getLengthFromData(TlvObject tlvObject, byte[] data, int pointer) {
         int length = 0;
         try {
@@ -180,6 +251,13 @@ public class TlvParser {
         return length;
     }
 
+    /**
+     * Returns value list of data of current tlvObject
+     * @param tlvObject current TlvObject
+     * @param data      current level data
+     * @param pointer   offset of data list
+     * @return          value list of data
+     */
     private List<Byte> getValueFromData(TlvObject tlvObject, byte[] data, int pointer) {
         List<Byte> value = new ArrayList<>();
         for (int j = 0; j < tlvObject.getLength(); j++) {
@@ -188,6 +266,13 @@ public class TlvParser {
         return value;
     }
 
+    /**
+     * Returns length which consist several bytes and adds this bytes to TlvObvect
+     * @param tlvObject current TlvObject
+     * @param data      current level data
+     * @param pointer   offset of data list
+     * @return          length
+     */
     private int getSeveralBytesLength(TlvObject tlvObject, byte[] data, int pointer) {
         int numOfLenBytes = data[pointer] & 0x7F;
         pointer++;

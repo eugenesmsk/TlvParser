@@ -3,10 +3,19 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
+/**
+ * This class provides conversion from bytes list to hex and fro hex string to byte array/
+ * @author Evgeniy Smirnov
+ */
 public class Converter {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     private static final Logger logger = LogManager.getLogger(DataLoader.class);
 
+    /**
+     * Static method which converts bytes list (<code>List<Byte></code>) to hex-string representation
+     * @param bytes data which needs to convert
+     * @return      string of conveted data
+     */
     public static String bytesToHex(List<Byte> bytes) {
         try {
             char[] hexChars = new char[bytes.size() * 2];
@@ -22,6 +31,11 @@ public class Converter {
         return "";
     }
 
+    /**
+     * Static method which converts hex-string to byte array.
+     * @param s input hex string
+     * @return  byte array of string representation
+     */
     public static byte[] hexStringToByteArray(String s) {
         try {
             try {
