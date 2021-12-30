@@ -1,3 +1,6 @@
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.List;
 
 /**
@@ -5,6 +8,8 @@ import java.util.List;
  * @author Evgeniy Smirnov
  */
 public class Printer {
+
+    private static final Logger logger = LogManager.getLogger(DataLoader.class);
 
     /**
      * Creates StringBuilde object, fill and print it.
@@ -56,10 +61,8 @@ public class Printer {
             return "A";
         } else if (classOfTag == 2) {
             return "C";
-        } else if (classOfTag == 3) {
-            return "P";
         } else {
-            throw new IllegalArgumentException("Wrong class of tag");
+            return "P";
         }
     }
 
@@ -71,10 +74,8 @@ public class Printer {
     private static String defineTagType(byte typeOfTag) {
         if (typeOfTag == 0) {
             return "P";
-        } else if (typeOfTag == 1) {
-            return "C";
         } else {
-            throw new IllegalArgumentException("Wrong type of tag");
+            return "C";
         }
     }
 
