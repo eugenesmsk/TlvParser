@@ -33,7 +33,6 @@ public class DataLoader {
             return Converter.hexStringToByteArray(cleanedLine);
         } catch (IOException e) {
             logger.error(e);
-            System.exit(1);
         }
         return new byte[0];
     }
