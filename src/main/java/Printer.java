@@ -9,8 +9,6 @@ import java.util.List;
  */
 public class Printer {
 
-    private static final Logger logger = LogManager.getLogger(DataLoader.class);
-
     /**
      * Creates StringBuilde object, fill and print it.
      * @param treeTopNode main TlvObject - top of tree

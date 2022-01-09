@@ -22,6 +22,7 @@ public class TlvParser {
     public void getParseResult(byte[] data) {
         if (data.length == 0) {
             logger.error("Data array is empty. Check input file.");
+            System.exit(1);
         }
         TlvObject treeTopTlv = parse(data);
         Printer.getResultString(treeTopTlv);
@@ -102,6 +103,7 @@ public class TlvParser {
                 } catch (ArrayIndexOutOfBoundsException e) {
                     logger.error("Error while forming multiple-bytes identifier. There is not the next byte for forming" +
                             " multiple-bytes identifier");
+                    System.exit(1);
                 }
             }
 
@@ -150,6 +152,7 @@ public class TlvParser {
                     parseTlv(object);
                 } catch (NullPointerException e) {
                     logger.error("Error while parsing of indefinite length TLV: there is not childs at indefinite TLV");
+                    System.exit(1);
                 }
             }
             parentTlv.setLength(parentTlv.getLength() + object.getLengthBytesList().size()
@@ -159,9 +162,11 @@ public class TlvParser {
             TlvObject lastObject = parentTlv.getChilds().get(parentTlv.getChilds().size() - 1);
             if (lastObject.getType() != 0 && lastObject.getLength() != 0) {
                 logger.error("Error while parsing indefinite length TLV. No found final tag of TLV");
+                System.exit(1);
             }
         } catch (IndexOutOfBoundsException e) {
             logger.error("Error while parsing of indefinite length TLV: there is not childs at indefinite TLV");
+            System.exit(1);
         }
     }
 
@@ -232,6 +237,7 @@ public class TlvParser {
 
                 if (tlvObject.getType() == 0) {
                     logger.error("Indefinite length in Primitive TLVs with id: {}", tlvObject.getIdentifier());
+                    System.exit(1);
                 }
                 tlvObject.addLengthByte(data[pointer]);
                 tlvObject.setDefinite(false);
@@ -246,6 +252,7 @@ public class TlvParser {
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.error("Wrong input data. Can't get tag length. {}", e.getMessage());
+            System.exit(1);
         }
 
         return length;

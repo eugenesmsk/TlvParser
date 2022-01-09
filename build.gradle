@@ -1,12 +1,18 @@
 plugins {
     id 'java'
-    id 'application'
+    id "application"
 }
 
 group 'org.parser'
 version '1.0-SNAPSHOT'
 
-mainClassName = 'main.java.Main'
+mainClassName = 'Main'
+apply plugin: 'application'
+
+
+run {
+    standardInput = System.in
+}
 
 repositories {
     mavenCentral()

@@ -3,6 +3,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * This class provides static method to get data.
@@ -12,13 +13,14 @@ public class DataLoader {
 
     private static final Logger logger = LogManager.getLogger(DataLoader.class);
 
-    static byte[] getData() {
-        return DataLoader.downloadData();
+    static byte[] getData(String inputFile) {
+        return DataLoader.downloadData(inputFile);
     }
 
-    private static byte[] downloadData() {
+    private static byte[] downloadData(String inputFile) {
+
+
         String cleanedLine;
-        String inputFile = "C:\\Users\\eugen\\Desktop\\task\\data\\my.hex";
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
             StringBuilder builder = new StringBuilder();
@@ -31,6 +33,7 @@ public class DataLoader {
             return Converter.hexStringToByteArray(cleanedLine);
         } catch (IOException e) {
             logger.error(e);
+            System.exit(1);
         }
         return new byte[0];
     }

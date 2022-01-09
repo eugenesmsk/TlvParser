@@ -26,6 +26,7 @@ public class Converter {
             return new String(hexChars);
         } catch (NullPointerException e) {
             logger.error("Input List<Byte> in bytesToHex() is null");
+            System.exit(1);
         }
         return "";
     }
@@ -51,9 +52,12 @@ public class Converter {
             } catch (StringIndexOutOfBoundsException e) {
                 logger.error("Odd number of characters in the hex line " +
                         "of the string (hexStringToByteArray): {}", s.length());
+                System.exit(1);
+
             }
         } catch (NullPointerException ex) {
             logger.error("Input string in hexStringToByteArray() is null");
+            System.exit(1);
         }
         return new byte[0];
     }
