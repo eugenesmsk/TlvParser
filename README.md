@@ -1,6 +1,6 @@
-## TVL парсер
+## TVL parser
 
 
-Для запуска парсера необходимо выполнить команду ```gradle run --args="ПУТЬ К ВХОДНОМУ ФАЙЛУ"```. 
+To run the parser, run the command ```gradle run --args="PATH TO INPUT FILE"```. 
 
-Если требуется распарсить несколько файлов с входными данными, то их пути необходимо указывать через пробел: ```gradle run --args="C:\data\firstFile.hex C:\data\secondFile.hex"```                      
+If you need to parse several files with input data, then their paths must be separated by a space: ```gradle run --args="C:\data\firstFile.hex C:\data\secondFile.hex"```                      
